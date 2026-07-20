@@ -1,0 +1,6 @@
+{
+  "name": "Universal TV",
+  "description": "A cross-platform IPTV application with live channels and categories.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
