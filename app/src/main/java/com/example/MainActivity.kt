@@ -6,7 +6,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -160,7 +163,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AdmobBannerAd(adUnitId: String) {
     AndroidView(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().height(50.dp), // Fix fixed height for standard banner
         factory = { context ->
             AdView(context).apply {
                 setAdSize(AdSize.BANNER)
@@ -267,14 +270,27 @@ fun SectionTitle(title: String) {
 
 @Composable
 fun ChannelCard(navController: NavHostController, channel: Channel, allChannels: List<Channel>) {
+    val interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
     Card(
         modifier = Modifier
             .size(160.dp, 100.dp)
-            .clickable { 
+            .focusable(interactionSource = interactionSource)
+            .border(
+                width = if (isFocused) 4.dp else 0.dp,
+                color = if (isFocused) MaterialTheme.colorScheme.primary else Color.Transparent,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .clickable(
+                interactionSource = interactionSource,
+                indication = androidx.compose.foundation.LocalIndication.current
+            ) { 
                 val index = allChannels.indexOf(channel)
                 navController.navigate("player/$index") 
             },
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isFocused) 8.dp else 2.dp)
     ) {
         Box(
             modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.primaryContainer),
@@ -313,9 +329,23 @@ fun CategoriesScreen(navController: NavHostController, viewModel: ChannelViewMod
             Text("Categories", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
         }
         items(categories) { category ->
+            val interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+            val isFocused by interactionSource.collectIsFocusedAsState()
+
             Card(
-                modifier = Modifier.fillMaxWidth().height(80.dp).clickable { navController.navigate("home") },
-                shape = RoundedCornerShape(12.dp)
+                modifier = Modifier.fillMaxWidth().height(80.dp)
+                    .focusable(interactionSource = interactionSource)
+                    .border(
+                        width = if (isFocused) 4.dp else 0.dp,
+                        color = if (isFocused) MaterialTheme.colorScheme.primary else Color.Transparent,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = androidx.compose.foundation.LocalIndication.current
+                    ) { navController.navigate("home") },
+                shape = RoundedCornerShape(12.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = if (isFocused) 8.dp else 2.dp)
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.secondaryContainer),
@@ -350,7 +380,26 @@ fun SettingsScreen() {
 
 @Composable
 fun SettingsItem(title: String) {
-    Card(modifier = Modifier.fillMaxWidth().height(60.dp)) {
+    val interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(60.dp)
+            .focusable(interactionSource = interactionSource)
+            .border(
+                width = if (isFocused) 4.dp else 0.dp,
+                color = if (isFocused) MaterialTheme.colorScheme.primary else Color.Transparent,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .clickable(
+                interactionSource = interactionSource,
+                indication = androidx.compose.foundation.LocalIndication.current
+            ) {},
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isFocused) 8.dp else 2.dp),
+        shape = RoundedCornerShape(12.dp)
+    ) {
         Box(
             modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
             contentAlignment = Alignment.CenterStart
