@@ -68,11 +68,16 @@ class ChannelViewModel : ViewModel() {
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
 
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
+
     init {
         fetchChannels()
     }
 
-    private fun fetchChannels() {
+    fun fetchChannels() {
+        _isLoading.value = true
+        _error.value = null
         viewModelScope.launch {
             try {
                 val fetchedChannels = withContext(Dispatchers.IO) {
@@ -83,9 +88,14 @@ class ChannelViewModel : ViewModel() {
                     // Remove duplicates by stream URL
                     combinedChannels.distinctBy { it.streamUrl }
                 }
-                _channels.value = fetchedChannels
+                
+                if (fetchedChannels.isEmpty()) {
+                    _error.value = "Live TV not updated. Please check your internet connection or try again later."
+                } else {
+                    _channels.value = fetchedChannels
+                }
             } catch (e: Exception) {
-                // Keep empty list on failure
+                _error.value = "Failed to load channels: ${e.localizedMessage}"
             } finally {
                 _isLoading.value = false
             }
@@ -208,10 +218,24 @@ data class BottomNavItem(val name: String, val route: String, val icon: ImageVec
 fun HomeScreen(navController: NavHostController, viewModel: ChannelViewModel) {
     val channels by viewModel.channels.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
 
     if (isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
+        }
+        return
+    }
+
+    if (error != null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                Text(text = error ?: "Unknown error", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyLarge)
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = { viewModel.fetchChannels() }) {
+                    Text("Retry")
+                }
+            }
         }
         return
     }
@@ -319,7 +343,29 @@ fun ChannelCard(navController: NavHostController, channel: Channel, allChannels:
 @Composable
 fun CategoriesScreen(navController: NavHostController, viewModel: ChannelViewModel) {
     val channels by viewModel.channels.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
     val categories = channels.map { it.category }.distinct().filter { it.isNotEmpty() }.sorted()
+
+    if (isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
+    if (error != null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                Text(text = error ?: "Unknown error", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyLarge)
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = { viewModel.fetchChannels() }) {
+                    Text("Retry")
+                }
+            }
+        }
+        return
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(16.dp),
