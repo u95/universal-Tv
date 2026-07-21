@@ -20,10 +20,10 @@
         android:usesCleartextTraffic="true"
         android:theme="@style/Theme.MyApplication">
         
-        <!-- User's AdMob App ID (assuming same format as Ad Unit ID) -->
+        <!-- User's AdMob App ID -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-4931646089594136~9647553595"/>
+            android:value="@string/admob_app_id"/>
 
         <activity
             android:name=".MainActivity"

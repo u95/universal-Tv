@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -143,7 +144,7 @@ class MainActivity : ComponentActivity() {
                     bottomBar = {
                         Column {
                             // AdMob Banner Unit ID provided by user
-                            AdmobBannerAd(adUnitId = "ca-app-pub-4931646089594136/9647553595")
+                            AdmobBannerAd(adUnitId = stringResource(id = R.string.admob_banner_id))
                             BottomNavigationBar(navController = navController)
                         }
                     }
